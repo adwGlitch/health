@@ -304,7 +304,14 @@ function updateStats() {
   const total = critical + warning;
   ['sidebarAlertBadge', 'topbarAlertCount'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = total;
+    if (el) {
+      if (total > 0) {
+        el.style.display = 'flex';
+        el.textContent = total;
+      } else {
+        el.style.display = 'none';
+      }
+    }
   });
 }
 

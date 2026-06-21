@@ -249,7 +249,11 @@
           </div>
         </div>
         <div class="arch-arrow-down">
-          <svg viewBox="0 0 24 48" fill="none"><path d="M12 2v44M4 36l8 8 8-8" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="position: relative; height: 48px; width: 24px;">
+            <svg viewBox="0 0 24 48" fill="none"><path d="M12 2v44M4 36l8 8 8-8" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="data-particle" style="animation-duration: 2s;"></div>
+            <div class="data-particle" style="animation-duration: 2s; animation-delay: 1s;"></div>
+          </div>
           <span>Data Stream</span>
         </div>
         <div class="arch-layer arch-layer-ai">
@@ -260,19 +264,25 @@
               <div class="arch-node-title">FarmGuard AI Engine</div>
               <div class="arch-node-sub">Data ingestion &amp; processing</div>
             </div>
-            <div class="arch-vconnect"></div>
+            <div class="arch-vconnect">
+              <div class="data-particle"></div>
+            </div>
             <div class="arch-node" id="archHealthAgent">
               <div class="arch-node-icon">🏥</div>
               <div class="arch-node-title">Health Analysis Agent</div>
               <div class="arch-node-sub">Multi-parameter correlation</div>
             </div>
-            <div class="arch-vconnect"></div>
+            <div class="arch-vconnect">
+              <div class="data-particle" style="animation-delay: 0.5s;"></div>
+            </div>
             <div class="arch-node" id="archRecoAgent">
               <div class="arch-node-icon">💡</div>
               <div class="arch-node-title">Recommendation Agent</div>
               <div class="arch-node-sub">Actionable insights generation</div>
             </div>
-            <div class="arch-vconnect"></div>
+            <div class="arch-vconnect">
+              <div class="data-particle" style="animation-delay: 1s;"></div>
+            </div>
             <div class="arch-node" id="archAlertMgmt">
               <div class="arch-node-icon">🔔</div>
               <div class="arch-node-title">Alert Management System</div>

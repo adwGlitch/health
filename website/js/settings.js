@@ -9,15 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const cowNameInput = document.getElementById('settingCowName');
   const cowBreedInput = document.getElementById('settingCowBreed');
 
-  const savedToken = localStorage.getItem('blynk_auth_token');
-  const savedGeminiKey = localStorage.getItem('gemini_api_key');
+  const savedToken = typeof getBlynkToken === 'function' ? getBlynkToken() : localStorage.getItem('blynk_auth_token');
+  const savedGeminiKey = typeof getGeminiApiKey === 'function' ? getGeminiApiKey() : localStorage.getItem('gemini_api_key');
   const savedCowName = localStorage.getItem('cow_name');
   const savedCowBreed = localStorage.getItem('cow_breed');
 
   if (tokenInput && savedToken && savedToken !== 'YOUR_AUTH_TOKEN') {
     tokenInput.value = savedToken;
   }
-  if (geminiInput && savedGeminiKey) {
+  if (geminiInput && savedGeminiKey && savedGeminiKey !== 'YOUR_API_KEY') {
     geminiInput.value = savedGeminiKey;
   }
   if (cowNameInput && savedCowName) {
@@ -39,11 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (blynkVal) {
         localStorage.setItem('blynk_auth_token', blynkVal);
         savedAnything = true;
+      } else {
+        localStorage.removeItem('blynk_auth_token');
       }
       
       if (geminiVal) {
         localStorage.setItem('gemini_api_key', geminiVal);
         savedAnything = true;
+      } else {
+        localStorage.removeItem('gemini_api_key');
       }
       
       if (savedAnything) {
@@ -62,7 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const breedVal = cowBreedInput.value.trim();
       
       if (nameVal) localStorage.setItem('cow_name', nameVal);
+      else localStorage.removeItem('cow_name');
+      
       if (breedVal) localStorage.setItem('cow_breed', breedVal);
+      else localStorage.removeItem('cow_breed');
       
       showSettingsToast('Livestock Profile Saved!', 'success');
     });

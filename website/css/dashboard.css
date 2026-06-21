@@ -1409,6 +1409,69 @@ body.sidebar-collapsed .sidebar-status {
   }
 }
 
+/* Live Monitoring Toggle Switch */
+.live-switch {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+.live-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.live-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: .4s;
+  border-radius: 18px;
+}
+
+.live-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .live-slider {
+  background-color: var(--color-healthy);
+}
+
+input:checked + .live-slider:before {
+  transform: translateX(14px);
+}
+
+/* Clear All Button */
+.topbar-clear-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.topbar-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
 /* ============================================================
    AI HEALTH INTELLIGENCE SECTION STYLES
    ============================================================ */
