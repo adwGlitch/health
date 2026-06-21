@@ -1222,6 +1222,18 @@ function setupSidebarToggle() {
     sidebar.classList.remove('open');
     overlay.classList.remove('visible');
   });
+
+  // Keyboard shortcuts for desktop
+  document.addEventListener('keydown', (e) => {
+    // Ignore if typing in an input
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+    if (e.key === 'ArrowLeft' && window.innerWidth > 992) {
+      document.body.classList.add('sidebar-collapsed');
+    } else if (e.key === 'ArrowRight' && window.innerWidth > 992) {
+      document.body.classList.remove('sidebar-collapsed');
+    }
+  });
 }
 
 function updateClock() {
