@@ -45,9 +45,12 @@
       </a>
     </nav>
     <div class="sidebar-status">
-      <div class="status-dot-wrap">
-        <span class="status-dot status-dot-live"></span>
-        <span class="status-text">Live Monitoring</span>
+      <div class="status-toggle-wrap" style="display: flex; align-items: center; gap: 8px;">
+        <label class="live-switch">
+          <input type="checkbox" id="liveMonitoringToggleSettings" checked>
+          <span class="live-slider"></span>
+        </label>
+        <span class="status-text" id="liveMonitoringTextSettings">Live Monitoring</span>
       </div>
       <span class="status-time" id="sidebarTime">--:--:--</span>
     </div>
