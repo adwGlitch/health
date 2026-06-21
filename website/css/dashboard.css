@@ -1,5 +1,5 @@
 /* =========================================================
-   FarmGuard AI – Dashboard Dark Glassmorphic Styles
+   FarmGuard AI – Advanced Dashboard Styles
    ========================================================= */
 
 :root {
@@ -18,6 +18,7 @@
   --color-healthy: #22c55e;
   --color-warning: #f97316;
   --color-critical: #ef4444;
+  --color-info: #06b6d4;
   
   --glass-blur: 16px;
   --shadow-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
@@ -564,11 +565,297 @@
 }
 
 /* ============================================================
+   HEALTH SCORE + AI PANEL GRID (Two Columns)
+   ============================================================ */
+.health-ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: var(--space-md);
+}
+
+/* Disease progress bars */
+.health-params {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.health-param {
+  display: grid;
+  grid-template-columns: 100px 1fr 40px;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.param-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.param-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.param-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease, background-color 0.5s ease;
+}
+
+.param-val {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* ============================================================
+   AI CHATBOT ASSISTANT PANEL
+   ============================================================ */
+.ai-panel {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-dark);
+}
+
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.ai-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ai-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+}
+
+.ai-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.ai-subtitle {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.ai-thinking {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.thinking-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--color-info);
+  border-radius: 50%;
+  animation: thinkDot 1.4s ease-in-out infinite;
+}
+
+.thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes thinkDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Chat bubble styling */
+.chat-bubble {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.875rem;
+  border-radius: 12px;
+  max-width: 85%;
+  word-wrap: break-word;
+  text-align: left;
+}
+
+.bot-msg {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.user-msg {
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.05);
+}
+
+/* Chat actions */
+.chat-quick-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chat-quick-btn:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.3);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   EMERGENCY OPERATIONS & FORECASTS
+   ============================================================ */
+.emergency-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.emergency-btn {
+  border: none;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.625rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-xs);
+}
+
+.emergency-btn.sms {
+  border-color: rgba(59, 130, 246, 0.2);
+}
+.emergency-btn.sms:hover {
+  background: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.emergency-btn.vet {
+  border-color: rgba(239, 68, 68, 0.2);
+}
+.emergency-btn.vet:hover {
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.emergency-btn.whatsapp {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+.emergency-btn.whatsapp:hover {
+  background: rgba(34, 197, 94, 0.15);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+}
+
+.emergency-btn.report {
+  background: var(--color-healthy);
+  color: #000;
+  border-color: var(--color-healthy);
+}
+.emergency-btn.report:hover {
+  background: #4ade80;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+}
+
+/* ============================================================
+   SVG ANIMAL AVATAR ANIMATIONS
+   ============================================================ */
+/* Head Bobbing Chewing (Healthy) */
+.cow-chewing #cowHead {
+  animation: chewingBob 1.8s infinite ease-in-out;
+}
+
+.cow-chewing #cowMouth {
+  animation: chewingMouth 0.9s infinite ease-in-out;
+}
+
+@keyframes chewingBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(2px) rotate(1deg); }
+}
+
+@keyframes chewingMouth {
+  0%, 100% { d: path("M72 90 Q80 92 88 90"); }
+  50% { d: path("M70 91 Q80 87 90 91"); }
+}
+
+/* Shaking / Jittering (Warning) */
+.cow-shaking #cowHead {
+  animation: warningShaker 0.15s infinite linear;
+}
+
+@keyframes warningShaker {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+  75% { transform: translate(1px, -1px) rotate(0.5deg); }
+}
+
+/* Dizzy Collapse (Critical) */
+.cow-collapsed #cowHead {
+  animation: criticalCollapse 3s infinite ease-in-out;
+  transform-origin: 80px 75px;
+}
+
+@keyframes criticalCollapse {
+  0%, 100% { transform: translateY(12px) rotate(-6deg); }
+  50% { transform: translateY(14px) rotate(-8deg); }
+}
+
+/* Cow spots pulse */
+.cow-collapsed #avatarAura {
+  animation: auraPulse 1s infinite ease-in-out;
+}
+
+@keyframes auraPulse {
+  0%, 100% { fill: rgba(239, 68, 68, 0.08); stroke: rgba(239, 68, 68, 0.2); }
+  50% { fill: rgba(239, 68, 68, 0.22); stroke: rgba(239, 68, 68, 0.4); }
+}
+
+/* ============================================================
    CHARTS SECTION
    ============================================================ */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-md);
   margin-bottom: var(--space-2xl);
 }
@@ -614,6 +901,260 @@
   background: rgba(34, 197, 94, 0.1);
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-full);
+}
+
+/* ============================================================
+   TOAST NOTIFICATION COMPONENT
+   ============================================================ */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  z-index: 200;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(10, 10, 15, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--color-healthy);
+  color: #fff;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 250px;
+  max-width: 380px;
+  transform: translateX(120%);
+  animation: slideInToast 0.3s forwards cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+@keyframes slideInToast {
+  to { transform: translateX(0); }
+}
+
+.toast.toast-warning { border-left-color: var(--color-warning); }
+.toast.toast-error { border-left-color: var(--color-critical); }
+.toast.toast-info { border-left-color: var(--color-info); }
+
+/* ============================================================
+   VETERINARY REPORT MODAL OVERLAY (Futuristic digital)
+   ============================================================ */
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+}
+
+.report-modal {
+  background: #0f172a;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 800px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.report-close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.report-close-btn:hover { color: #fff; }
+
+.report-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-xl);
+}
+
+/* Printable PDF Document Sheet styling (within the modal) */
+.report-document {
+  background: #fff;
+  color: #0f172a;
+  padding: 40px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.doc-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.doc-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.doc-subtitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-healthy);
+  letter-spacing: 0.05em;
+}
+
+.doc-meta-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.doc-meta-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.doc-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.doc-section-heading {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0f172a;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 4px;
+  margin: var(--space-lg) 0 var(--space-sm);
+}
+
+.doc-subsection-heading {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #334155;
+  margin: var(--space-md) 0 var(--space-xs);
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-lg);
+}
+
+.doc-table th {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.doc-table td {
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.doc-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+}
+
+.doc-text {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+}
+
+.doc-estimate-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  padding: 4px 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.doc-signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.sig-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.report-footer {
+  padding: var(--space-md) var(--space-xl);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0,0,0,0.2);
+}
+
+.report-print-btn {
+  background: var(--color-healthy);
+  color: #000;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.report-print-btn:hover {
+  background: #4ade80;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
 }
 
 /* ============================================================
@@ -704,6 +1245,10 @@
    RESPONSIVE DESIGN AND MOBILE ADAPTATION
    ============================================================ */
 @media (max-width: 1024px) {
+  .health-ai-grid {
+    grid-template-columns: 1fr;
+  }
+
   .sidebar {
     transform: translateX(-100%);
   }
@@ -769,5 +1314,54 @@
   
   .charts-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   PRINT MEDIA STYLE OVERRIDES (window.print() clean-cut PDF)
+   ============================================================ */
+@media print {
+  /* Hide all dashboard chrome */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+  .sidebar, .topbar, #blynkDashboardWorkspace, .report-header, .report-footer, .report-close-btn, .sidebar-overlay, .toast-container {
+    display: none !important;
+  }
+  .report-modal-overlay {
+    position: absolute;
+    inset: 0 !important;
+    background: #fff !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .report-modal {
+    border: none !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  .report-scroll-body {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .report-document {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #0f172a !important;
+  }
+  .doc-card {
+    border: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+  }
+  .doc-title-row {
+    border-bottom: 2px solid #0f172a !important;
   }
 }

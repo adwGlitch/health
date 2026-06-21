@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FarmGuard AI – Advanced Livestock Health Platform</title>
+  <meta name="description" content="AI-powered livestock health monitoring platform. Predictive disease analysis, veterinary assistant, and emergency alerts." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body class="dashboard-body">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon logo-icon-sm">
+          <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#16a34a"/><path d="M8 20 C8 14 12 10 16 10 C20 10 24 14 24 20" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="12" cy="18" r="2" fill="white"/><circle cx="20" cy="18" r="2" fill="white"/><path d="M14 22 C14 23 15 24 16 24 C17 24 18 23 18 22" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+        </div>
+        <span class="logo-text">FarmGuard <span class="logo-ai">AI</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link active" id="navDashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="alerts.html" class="sidebar-link" id="navAlerts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Alerts
+        <span class="sidebar-badge" id="sidebarAlertBadge">3</span>
+      </a>
+      <div class="sidebar-section-label">Sensors</div>
+      <a href="#sensorCards" class="sidebar-link" id="navSensors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Live Sensors
+      </a>
+      <a href="#chartsSection" class="sidebar-link" id="navCharts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Charts
+      </a>
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="index.html" class="sidebar-link" id="navHome">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+    </nav>
+    <div class="sidebar-status">
+      <div class="status-dot-wrap">
+        <span class="status-dot status-dot-live"></span>
+        <span class="status-text">Live Monitoring</span>
+      </div>
+      <span class="status-time" id="sidebarTime">--:--:--</span>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <div class="main-content" id="mainContent">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="topbar-menu-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h1 class="topbar-heading">Live Dashboard</h1>
+        <span class="topbar-sub" id="topbarDate">Loading...</span>
+      </div>
+      
+      <!-- Topbar Controls -->
+      <div class="topbar-right">
+        <!-- Blynk token settings widget -->
+        <div class="blynk-config-panel" id="blynkTokenConfig">
+          <span class="blynk-config-label">Blynk Token</span>
+          <input type="password" class="blynk-token-input" id="blynkTokenInput" placeholder="Enter Blynk Auth Token" />
+          <button class="blynk-save-btn" id="blynkTokenSaveBtn">Save</button>
+        </div>
+        
+        <!-- Live status indicator -->
+        <div class="topbar-live-indicator configuring" id="blynkConnectionStatus">
+          <span class="live-dot"></span>
+          <span class="live-text" id="blynkConnectionText">CONFIGURING</span>
+        </div>
+        
+        <a href="alerts.html" class="topbar-alert-btn" id="topbarAlertBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="topbar-alert-count" id="topbarAlertCount">0</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- ===== BLYNK AUTH REQUIRED OVERLAY ===== -->
+    <div class="dash-section" id="blynkEmptyStatePanel" style="display: none; padding-top: var(--space-2xl);">
+      <div class="blynk-overlay-card">
+        <div class="blynk-overlay-icon">🔒</div>
+        <h2 class="blynk-overlay-title">Blynk Cloud Connection Required</h2>
+        <p class="blynk-overlay-desc">FarmGuard AI is configured to display real-time sensor streams directly from the Blynk Cloud HTTP API. Please enter your Blynk Device Auth Token below to establish the connection.</p>
+        <div class="blynk-overlay-form">
+          <input type="text" class="blynk-overlay-input" id="blynkOverlayTokenInput" placeholder="Pasted Blynk Device Auth Token..." />
+          <button class="blynk-overlay-btn" id="blynkOverlaySaveBtn">Connect Device</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MAIN DASHBOARD WORKSPACE ===== -->
+    <div id="blynkDashboardWorkspace">
+      <!-- ===== SENSOR METRIC CARDS ===== -->
+      <section class="dash-section" id="sensorCards">
+        <div class="section-row-header">
+          <h2 class="dash-section-title">Live Sensor Readings</h2>
+          <span class="dash-section-badge" id="updateBadge">Refreshing every 3s</span>
+        </div>
+        <div class="metric-cards-grid">
+          <!-- Temperature (V0) -->
+          <div class="metric-card" id="cardTemperature">
+            <div class="metric-card-header">
+              <div class="metric-icon">🌡️</div>
+              <div class="metric-info">
+                <div class="metric-label">Temperature</div>
+                <div class="metric-source">Blynk Pin V0</div>
+              </div>
+              <div class="metric-status-badge" id="tempStatusBadge">Normal</div>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="tempValue">--.-</span>
+              <span class="metric-unit">°C</span>
+            </div>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar">
+                <div class="metric-bar-fill metric-bar-green" id="tempBar" style="width: 0%"></div>
+              </div>
+              <div class="metric-range-labels"><span>30°C</span><span>45°C</span></div>
+            </div>
+            <div class="metric-trend">
+              <span class="status-time" id="tempUpdated">Waiting...</span>
+              <span class="trend-label trend-neutral" id="tempTrend">—</span>
+            </div>
+          </div>
+
+          <!-- Heart Rate (V1) -->
+          <div class="metric-card" id="cardHeartRate">
+            <div class="metric-card-header">
+              <div class="metric-icon">❤️</div>
+              <div class="metric-info">
+                <div class="metric-label">Heart Rate</div>
+                <div class="metric-source">Blynk Pin V1</div>
+              </div>
+              <div class="metric-status-badge" id="hrStatusBadge">Normal</div>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="hrValue">--</span>
+              <span class="metric-unit">BPM</span>
+            </div>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar">
+                <div class="metric-bar-fill metric-bar-green" id="hrBar" style="width: 0%"></div>
+              </div>
+              <div class="metric-range-labels"><span>40 BPM</span><span>130 BPM</span></div>
+            </div>
+            <div class="metric-trend">
+              <span class="status-time" id="hrUpdated">Waiting...</span>
+              <span class="trend-label trend-neutral" id="hrTrend">—</span>
+            </div>
+          </div>
+
+          <!-- Gas Level (V2) -->
+          <div class="metric-card" id="cardGas">
+            <div class="metric-card-header">
+              <div class="metric-icon">🌬️</div>
+              <div class="metric-info">
+                <div class="metric-label">Gas Level</div>
+                <div class="metric-source">Blynk Pin V2</div>
+              </div>
+              <div class="metric-status-badge" id="gasStatusBadge">Safe</div>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="gasValue">--</span>
+              <span class="metric-unit">ppm</span>
+            </div>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar">
+                <div class="metric-bar-fill metric-bar-green" id="gasBar" style="width: 0%"></div>
+              </div>
+              <div class="metric-range-labels"><span>0 ppm</span><span>500 ppm</span></div>
+            </div>
+            <div class="metric-trend">
+              <span class="status-time" id="gasUpdated">Waiting...</span>
+              <span class="trend-label trend-neutral" id="gasTrend">—</span>
+            </div>
+          </div>
+
+          <!-- Movement (V3) -->
+          <div class="metric-card" id="cardMovement">
+            <div class="metric-card-header">
+              <div class="metric-icon">🏃</div>
+              <div class="metric-info">
+                <div class="metric-label">Movement</div>
+                <div class="metric-source">Blynk Pin V3</div>
+              </div>
+              <div class="metric-status-badge" id="movementStatusBadge">Active</div>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="movementValue">--.-</span>
+              <span class="metric-unit">m/s²</span>
+            </div>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar">
+                <div class="metric-bar-fill metric-bar-green" id="movementBar" style="width: 0%"></div>
+              </div>
+              <div class="metric-range-labels"><span>0 m/s²</span><span>20 m/s²</span></div>
+            </div>
+            <div class="metric-trend">
+              <span class="status-time" id="movementUpdated">Waiting...</span>
+              <span class="trend-label trend-neutral" id="movementTrend">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== HEALTH & AI ENGINE DIAGNOSTICS ROW ===== -->
+      <section class="dash-section">
+        <div class="health-ai-grid">
+          <!-- Column Left: Health Status, Avatar and Disease Predictions -->
+          <div class="health-left-col" style="display: flex; flex-direction: column; gap: var(--space-md);">
+            
+            <!-- Health Avatar & Status Card -->
+            <div class="metric-card" id="healthStatusCard" style="display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-md);">
+              <div class="metric-card-header" style="justify-content: space-between;">
+                <h2 class="dash-section-title" style="margin: 0;">AI Health Status &amp; Avatar</h2>
+                <span class="health-updated" id="healthUpdated">Waiting...</span>
+              </div>
+              
+              <div class="health-avatar-container" style="display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); padding: var(--space-sm) 0;">
+                <!-- Animated Inline SVG Avatar -->
+                <div class="avatar-wrap">
+                  <svg id="cowAvatar" viewBox="0 0 160 160" width="120" height="120" style="overflow: visible;">
+                    <circle id="avatarAura" cx="80" cy="80" r="60" fill="rgba(34, 197, 94, 0.1)" stroke="rgba(34, 197, 94, 0.2)" stroke-width="2" style="transition: all 0.5s ease;"></circle>
+                    <g id="cowBody">
+                      <rect x="50" y="80" width="60" height="50" rx="15" fill="#f8fafc" stroke="#334155" stroke-width="3"></rect>
+                      <circle cx="65" cy="95" r="8" fill="#1e293b"></circle>
+                      <circle cx="95" cy="115" r="10" fill="#1e293b"></circle>
+                      <rect x="60" y="130" width="10" height="20" fill="#e2e8f0" stroke="#334155" stroke-width="3"></rect>
+                      <rect x="90" y="130" width="10" height="20" fill="#e2e8f0" stroke="#334155" stroke-width="3"></rect>
+                    </g>
+                    <g id="cowHead" style="transform-origin: 80px 75px; transition: transform 0.5s ease;">
+                      <ellipse cx="40" cy="50" rx="15" ry="6" transform="rotate(-30 40 50)" fill="#f1f5f9" stroke="#334155" stroke-width="3"></ellipse>
+                      <ellipse cx="120" cy="50" rx="15" ry="6" transform="rotate(30 120 50)" fill="#f1f5f9" stroke="#334155" stroke-width="3"></ellipse>
+                      <path d="M55 40 Q45 25 35 30 Q45 35 52 42 Z" fill="#cbd5e1" stroke="#334155" stroke-width="2"></path>
+                      <path d="M105 40 Q115 25 125 30 Q115 35 108 42 Z" fill="#cbd5e1" stroke="#334155" stroke-width="2"></path>
+                      <rect x="48" y="45" width="64" height="50" rx="18" fill="#f8fafc" stroke="#334155" stroke-width="3"></rect>
+                      <rect x="54" y="72" width="52" height="28" rx="12" fill="#fbcfe8" stroke="#334155" stroke-width="2.5"></rect>
+                      <circle cx="70" cy="82" r="2.5" fill="#e11d48"></circle>
+                      <circle cx="90" cy="82" r="2.5" fill="#e11d48"></circle>
+                      <path id="cowMouth" d="M72 90 Q80 92 88 90" stroke="#be185d" stroke-width="2.5" stroke-linecap="round" fill="none" style="transition: all 0.3s ease;"></path>
+                      <path id="cowSweat" d="M112 55 Q115 62 110 65 Q105 62 108 55 Z" fill="#3b82f6" style="display: none;"></path>
+                      <g id="cowEyesHealthy">
+                        <path d="M58 60 Q65 52 72 60" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"></path>
+                        <path d="M88 60 Q95 52 102 60" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"></path>
+                      </g>
+                      <g id="cowEyesWarning" style="display: none;">
+                        <circle cx="65" cy="58" r="6" fill="#1e293b"></circle>
+                        <circle cx="95" cy="58" r="6" fill="#1e293b"></circle>
+                        <circle cx="63" cy="56" r="2" fill="#ffffff"></circle>
+                        <circle cx="93" cy="56" r="2" fill="#ffffff"></circle>
+                      </g>
+                      <g id="cowEyesCritical" style="display: none;">
+                        <path d="M60 54 L70 64 M70 54 L60 64" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round"></path>
+                        <path d="M90 54 L100 64 M100 54 L90 64" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round"></path>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                
+                <!-- Status details & risk score ring -->
+                <div class="avatar-details" style="display: flex; gap: var(--space-md); align-items: center;">
+                  <!-- Health Risk Score Radial Ring -->
+                  <div class="health-ring-wrap" style="position: relative; width: 90px; height: 90px;">
+                    <svg viewBox="0 0 100 100" style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                      <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"></circle>
+                      <circle id="riskScoreRing" cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8" fill="none" stroke-dasharray="263.8" stroke-dashoffset="263.8" stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease, stroke 0.5s ease;"></circle>
+                    </svg>
+                    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                      <span id="riskScoreNum" style="font-size: 1.3rem; font-weight: 800;">0</span>
+                      <span style="font-size: 0.55rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Risk Score</span>
+                    </div>
+                  </div>
+                  
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs); text-align: left;">
+                    <span class="status-value healthy" id="healthStatusValue" style="font-size: 1.5rem;">LOADING</span>
+                    <span id="healthStatusDesc" style="font-size: 0.72rem; color: var(--text-secondary); max-width: 180px; line-height: 1.4;">Booting health assessment...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- AI Disease Prediction Card -->
+            <div class="metric-card" id="diseasePredictionCard" style="display: flex; flex-direction: column; gap: var(--space-md);">
+              <div class="metric-card-header">
+                <div class="metric-icon">🧠</div>
+                <div class="metric-info">
+                  <div class="metric-label">AI Disease Risk Estimate</div>
+                  <div class="metric-source">Probabilities updated dynamically</div>
+                </div>
+              </div>
+              <div class="health-params" style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <div class="health-param">
+                  <span class="param-name" style="width: 100px;">Heat Stress</span>
+                  <div class="param-bar"><div class="param-bar-fill" id="probHeatBar" style="width: 0%; background: #22c55e;"></div></div>
+                  <span class="param-val" id="probHeatVal">0%</span>
+                </div>
+                <div class="health-param">
+                  <span class="param-name" style="width: 100px;">Respiratory Inf.</span>
+                  <div class="param-bar"><div class="param-bar-fill" id="probRespBar" style="width: 0%; background: #22c55e;"></div></div>
+                  <span class="param-val" id="probRespVal">0%</span>
+                </div>
+                <div class="health-param">
+                  <span class="param-name" style="width: 100px;">Anxiety/Stress</span>
+                  <div class="param-bar"><div class="param-bar-fill" id="probStressBar" style="width: 0%; background: #22c55e;"></div></div>
+                  <span class="param-val" id="probStressVal">0%</span>
+                </div>
+                <div class="health-param">
+                  <span class="param-name" style="width: 100px;">Healthy State</span>
+                  <div class="param-bar"><div class="param-bar-fill" id="probHealthyBar" style="width: 0%; background: #22c55e;"></div></div>
+                  <span class="param-val" id="probHealthyVal">0%</span>
+                </div>
+              </div>
+              <span style="font-size: 0.6rem; color: var(--text-muted); font-style: italic; text-align: left;">
+                * Disclaimer: Predictions are AI-generated estimates and not official veterinary diagnoses.
+              </span>
+            </div>
+            
+          </div>
+          
+          <!-- Column Right: Chatbot Panel -->
+          <div class="ai-panel" id="aiPanel" style="display: flex; flex-direction: column; min-height: 380px;">
+            <div class="ai-panel-header">
+              <div class="ai-header-left">
+                <div class="ai-avatar">🤖</div>
+                <div>
+                  <div class="ai-title">AI Veterinary Assistant</div>
+                  <div class="ai-subtitle">FarmGuard Local Intelligence Chat</div>
+                </div>
+              </div>
+              <div class="ai-thinking" id="aiThinking" style="opacity: 0; transition: opacity 0.3s ease;">
+                <span class="thinking-dot"></span>
+                <span class="thinking-dot"></span>
+                <span class="thinking-dot"></span>
+              </div>
+            </div>
+            
+            <div class="ai-panel-body" id="chatFeed" style="flex: 1; min-height: 200px; display: flex; flex-direction: column; gap: var(--space-md); overflow-y: auto; padding: var(--space-md); background: rgba(0,0,0,0.15);">
+              <!-- Chat Bubbles populated dynamically -->
+              <div class="chat-bubble bot-msg">
+                <strong>FarmGuard AI:</strong> Hello! I am your AI Veterinary Assistant. Ask me anything about the animal's current vitals, possible health risks, or preventative actions.
+              </div>
+            </div>
+            
+            <!-- Quick Prompts Buttons -->
+            <div class="chat-quick-actions" style="padding: var(--space-sm) var(--space-md); display: flex; gap: var(--space-xs); flex-wrap: wrap; border-top: 1px solid var(--glass-border);">
+              <button class="chat-quick-btn" id="btnAskAnalyze">🩺 Analyze Vitals</button>
+              <button class="chat-quick-btn" id="btnAskCauses">🔍 Explain Risks</button>
+              <button class="chat-quick-btn" id="btnAskActions">💊 Get Actions</button>
+            </div>
+            
+            <!-- Chat Input form -->
+            <div class="ai-panel-footer" style="padding: var(--space-sm) var(--space-md);">
+              <div style="display: flex; width: 100%; gap: var(--space-sm); align-items: center;">
+                <input type="text" class="chat-input-text" id="chatTextInput" placeholder="Ask about heart rate, fever, recommendations..." style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 0.5rem 0.875rem; border-radius: var(--radius-md); color: #fff; font-size: 0.8rem; outline: none;" />
+                <button class="chat-send-btn" id="chatSendBtn" style="background: var(--color-healthy); border: none; color: #000; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 700; font-size: 0.8rem; cursor: pointer;">Send</button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </section>
+
+      <!-- ===== PREDICTIVE FORECASTS & EMERGENCY ROW ===== -->
+      <section class="dash-section">
+        <div class="health-ai-grid">
+          <!-- AI Predictive Analytics -->
+          <div class="metric-card" id="cardPrediction" style="display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-md);">
+            <div class="metric-card-header">
+              <div class="metric-icon">🔮</div>
+              <div class="metric-info">
+                <div class="metric-label">AI Predictive Analytics</div>
+                <div class="metric-source">Forecast state in 1 hour</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-around; padding: var(--space-xs) 0;">
+              <div>
+                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Current State</div>
+                <div id="forecastCurrentState" style="font-size: 1.25rem; font-weight: 800; color: var(--color-healthy);">HEALTHY</div>
+              </div>
+              <div style="font-size: 1.5rem; color: var(--text-muted);">➔</div>
+              <div>
+                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Forecast (1 Hour)</div>
+                <div id="forecastPredictedState" style="font-size: 1.25rem; font-weight: 800; color: var(--color-healthy);">HEALTHY</div>
+              </div>
+              <div>
+                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Confidence</div>
+                <div id="forecastConfidence" style="font-size: 1.25rem; font-weight: 800; color: #22c55e;">95%</div>
+              </div>
+            </div>
+            <div style="height: 40px; width: 100%; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); overflow: hidden; display: flex; align-items: center; padding: 0 var(--space-sm); gap: 4px;">
+              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700;">CONFIDENCE RANGE:</span>
+              <div style="flex: 1; height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                <div id="forecastConfidenceBar" style="position: absolute; top:0; left:0; bottom:0; width: 95%; background: linear-gradient(90deg, #22c55e, #10b981); transition: width 0.8s ease;"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Emergency Alert Center & PDF Generator -->
+          <div class="metric-card" id="cardEmergency" style="display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-md);">
+            <div class="metric-card-header">
+              <div class="metric-icon">🚨</div>
+              <div class="metric-info">
+                <div class="metric-label">Emergency Operations Center</div>
+                <div class="metric-source">Instant veterinary alerts &amp; reports</div>
+              </div>
+            </div>
+            <div class="emergency-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm);">
+              <button class="emergency-btn sms" id="btnNotifyFarmer">📱 Notify Farmer</button>
+              <button class="emergency-btn vet" id="btnNotifyVet">🏥 Call Veterinarian</button>
+              <button class="emergency-btn whatsapp" id="btnNotifyWhatsApp">💬 WhatsApp Alert</button>
+              <button class="emergency-btn report" id="btnGenerateReport">📝 Generate Report</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CHARTS ===== -->
+      <section class="dash-section" id="chartsSection">
+        <div class="section-row-header">
+          <h2 class="dash-section-title">Real-Time Trend Charts</h2>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card" id="chartCardTemp">
+            <div class="chart-card-header">
+              <span class="chart-icon">🌡️</span>
+              <span class="chart-title">Temperature Trend</span>
+              <span class="chart-current" id="chartTempCurrent">--.- °C</span>
+            </div>
+            <div style="height: 150px; position: relative;">
+              <canvas id="tempChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card" id="chartCardHR">
+            <div class="chart-card-header">
+              <span class="chart-icon">❤️</span>
+              <span class="chart-title">Heart Rate Trend</span>
+              <span class="chart-current" id="chartHRCurrent">-- BPM</span>
+            </div>
+            <div style="height: 150px; position: relative;">
+              <canvas id="hrChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card" id="chartCardGas">
+            <div class="chart-card-header">
+              <span class="chart-icon">🌬️</span>
+              <span class="chart-title">Gas Level Trend</span>
+              <span class="chart-current" id="chartGasCurrent">-- ppm</span>
+            </div>
+            <div style="height: 150px; position: relative;">
+              <canvas id="gasChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div><!-- end main-content -->
+
+  <!-- ============ VETERINARY REPORT MODAL ============ -->
+  <div class="report-modal-overlay" id="reportModalOverlay" style="display: none;">
+    <div class="report-modal">
+      <div class="report-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="logo-icon logo-icon-sm">
+            <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#16a34a"/><path d="M8 20 C8 14 12 10 16 10 C20 10 24 14 24 20" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="12" cy="18" r="2" fill="white"/><circle cx="20" cy="18" r="2" fill="white"/><path d="M14 22 C14 23 15 24 16 24 C17 24 18 23 18 22" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+          </div>
+          <span style="font-size: 1.15rem; font-weight: 800; color: #fff;">FarmGuard <span style="color: #22c55e;">AI</span></span>
+        </div>
+        <button class="report-close-btn" id="btnReportClose">×</button>
+      </div>
+      <div class="report-scroll-body" id="reportPrintArea">
+        <div class="report-document">
+          <div class="doc-title-row">
+            <div>
+              <h1 class="doc-title">Livestock Health Summary</h1>
+              <span class="doc-subtitle">FarmGuard AI Diagnostic Platform</span>
+            </div>
+            <div style="text-align: right;">
+              <div class="doc-meta-label">REPORT ID</div>
+              <div class="doc-meta-val" id="reportIdVal">FG-908A72</div>
+            </div>
+          </div>
+          
+          <div class="doc-meta-grid">
+            <div>
+              <div class="doc-meta-label">DEVICE AUTH TOKEN</div>
+              <div class="doc-meta-val" id="reportTokenVal">--</div>
+            </div>
+            <div>
+              <div class="doc-meta-label">TIMESTAMP</div>
+              <div class="doc-meta-val" id="reportTimeVal">--</div>
+            </div>
+            <div>
+              <div class="doc-meta-label">OVERALL HEALTH STATE</div>
+              <div class="doc-meta-val" id="reportHealthVal">--</div>
+            </div>
+          </div>
+          
+          <h2 class="doc-section-heading">1. Sensor Vitals Log</h2>
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Datastream</th>
+                <th>Pin</th>
+                <th>Current Reading</th>
+                <th>Physiological Range</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Body Temperature</td>
+                <td>V0</td>
+                <td id="repTempVal">-- °C</td>
+                <td>35.0°C – 39.5°C</td>
+                <td id="repTempStat">--</td>
+              </tr>
+              <tr>
+                <td>Heart Rate</td>
+                <td>V1</td>
+                <td id="repHrVal">-- BPM</td>
+                <td>60 – 90 BPM</td>
+                <td id="repHrStat">--</td>
+              </tr>
+              <tr>
+                <td>Gas Level (Ambient)</td>
+                <td>V2</td>
+                <td id="repGasVal">-- ppm</td>
+                <td>0 – 200 ppm</td>
+                <td id="repGasStat">--</td>
+              </tr>
+              <tr>
+                <td>Movement Speed</td>
+                <td>V3</td>
+                <td id="repMoveVal">-- m/s²</td>
+                <td>>= 2.0 m/s²</td>
+                <td id="repMoveStat">--</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <h2 class="doc-section-heading">2. AI Diagnosis Summary</h2>
+          <div class="doc-card">
+            <div style="font-weight: 700; color: #fff; margin-bottom: 5px;">Risk Score Assessment: <span id="repRiskScore">--</span>/100</div>
+            <p class="doc-text" id="repAiStatus">Analyzing vitals details...</p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
+            <div>
+              <h3 class="doc-subsection-heading">3. Diagnostic Estimates</h3>
+              <div class="doc-card">
+                <div class="doc-estimate-row"><span>Heat Stress Probability:</span><strong id="repProbHeat">--%</strong></div>
+                <div class="doc-estimate-row"><span>Respiratory Infection:</span><strong id="repProbResp">--%</strong></div>
+                <div class="doc-estimate-row"><span>Anxiety/Stress Level:</span><strong id="repProbStress">--%</strong></div>
+              </div>
+            </div>
+            <div>
+              <h3 class="doc-subsection-heading">4. Recommended Protocols</h3>
+              <div class="doc-card" id="repAiActions" style="font-size: 0.75rem; line-height: 1.5;">
+                <!-- Filled dynamically -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="doc-signatures">
+            <div class="sig-line">
+              <div style="border-top: 1px solid var(--text-muted); width: 180px; margin-bottom: 4px;"></div>
+              <div>Farmer Signature</div>
+            </div>
+            <div class="sig-line">
+              <div style="border-top: 1px solid var(--text-muted); width: 180px; margin-bottom: 4px;"></div>
+              <div>Attending Veterinarian</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="report-footer">
+        <button class="report-print-btn" id="btnReportPrint">Print Health Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Sidebar Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <script src="js/dashboard.js?v=3"></script>
+</body>
+</html>

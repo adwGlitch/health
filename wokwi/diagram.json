@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "author": "Adwaith Krishna",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-breadboard-mini", "id": "bb1", "top": 209.8, "left": -40.8, "attrs": {} },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -57.6, "left": -14.36, "attrs": {} },
+    { "type": "wokwi-mpu6050", "id": "imu1", "top": -15.38, "left": -170.48, "attrs": {} },
+    { "type": "wokwi-gas-sensor", "id": "gas1", "top": 69.9, "left": -194.6, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 104.3, "left": 124.6, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -47.7,
+      "left": 138.6,
+      "attrs": { "temperature": "24.8", "humidity": "34.5" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "bb1:17t.a", "red", [ "v19.2", "h0", "v0", "h67.2", "v124.8" ] ],
+    [ "dht1:GND", "bb1:1t.a", "black", [ "v19.2", "v9.6", "h-67.2", "v67.2", "h-144", "v57.6" ] ],
+    [ "esp:4", "dht1:SDA", "cyan", [ "h0" ] ],
+    [ "imu1:VCC", "bb1:17t.b", "red", [ "v-96", "h364.88", "v9.6" ] ],
+    [ "esp:22", "imu1:SCL", "blue", [ "h19.2", "v-67.2", "h-220.8", "v9.6" ] ],
+    [ "imu1:GND", "bb1:1t.b", "black", [ "v-19.2", "h76.88", "v163.2", "h-28.8", "v9.6" ] ],
+    [ "esp:21", "imu1:SDA", "orange", [ "h38.4", "v-105.6", "h-268.8", "v48", "h19.2" ] ],
+    [ "gas1:GND", "bb1:1t.c", "black", [ "h9.6", "v76", "h-38.4", "v57.6", "h9.6" ] ],
+    [ "gas1:VCC", "bb1:1b.f", "red", [ "h0", "v8.7", "h-9.6", "v163.2" ] ],
+    [ "esp:35", "gas1:AOUT", "violet", [ "h-38.25", "v67.2", "h9.6" ] ],
+    [ "pot1:GND", "bb1:1t.d", "black", [ "v19.2", "h-268.8", "v57.6", "h9.6" ] ],
+    [ "esp:34", "pot1:SIG", "gray", [ "h-9.45", "v192", "h182.4" ] ],
+    [ "pot1:VCC", "bb1:17t.c", "red", [ "v67.2", "h8.8" ] ],
+    [ "esp:5V", "bb1:1b.g", "red", [ "h-134.25", "v28.8" ] ],
+    [ "esp:GND.1", "bb1:1t.e", "black", [ "h-28.65", "v57.6", "h-48", "v105.6" ] ],
+    [ "esp:3V3", "bb1:17t.d", "red", [ "h-19.05", "v-67.2", "h240", "v0", "h38.4", "v345.6" ] ]
+  ],
+  "dependencies": {}
+}
