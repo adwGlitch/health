@@ -74,6 +74,13 @@
       
       <!-- Topbar Controls -->
       <div class="topbar-right">
+        <!-- Gemini API Key settings widget -->
+        <div class="blynk-config-panel" id="geminiKeyConfig">
+          <span class="blynk-config-label">Gemini Key</span>
+          <input type="password" class="blynk-token-input" id="geminiKeyInput" placeholder="Enter Gemini API Key" />
+          <button class="blynk-save-btn" id="geminiKeySaveBtn">Save</button>
+        </div>
+
         <!-- Blynk token settings widget -->
         <div class="blynk-config-panel" id="blynkTokenConfig">
           <span class="blynk-config-label">Blynk Token</span>
@@ -186,7 +193,7 @@
               <div class="metric-bar">
                 <div class="metric-bar-fill metric-bar-green" id="gasBar" style="width: 0%"></div>
               </div>
-              <div class="metric-range-labels"><span>0 ppm</span><span>500 ppm</span></div>
+              <div class="metric-range-labels"><span>0 ppm</span><span>4000 ppm</span></div>
             </div>
             <div class="metric-trend">
               <span class="status-time" id="gasUpdated">Waiting...</span>
@@ -219,6 +226,125 @@
               <span class="trend-label trend-neutral" id="movementTrend">—</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ===== AI HEALTH INTELLIGENCE SECTION ===== -->
+      <section class="dash-section" id="aiHealthIntelligence">
+        <div class="section-row-header">
+          <div style="display: flex; align-items: center; gap: var(--space-xs);">
+            <div class="ai-intelligence-icon">🧠</div>
+            <h2 class="dash-section-title" style="margin: 0;">AI Health Intelligence</h2>
+          </div>
+          <button class="generate-ai-btn" id="btnGenerateAIReport">
+            <span class="btn-icon">🧠</span>
+            <span class="btn-text">Generate AI Report</span>
+          </button>
+        </div>
+
+        <div class="ai-report-container initial-state" id="aiReportCard">
+          <!-- Before report is generated, show initial placeholder state -->
+          <div class="ai-report-placeholder" id="aiReportPlaceholder">
+            <div class="placeholder-glow"></div>
+            <div class="placeholder-icon">🩺</div>
+            <h3>Intelligent Veterinary Advisor Ready</h3>
+            <p>Click "Generate AI Report" to perform a deep diagnostics check using Google Gemini 2.0 Flash model. The AI will assess live telemetry, identify potential conditions, calculate a health score, and recommend clinical protocols.</p>
+          </div>
+
+          <!-- Loading State (hidden initially) -->
+          <div class="ai-report-loading" id="aiReportLoading" style="display: none;">
+            <div class="loading-pulse-spinner"></div>
+            <h3>Consulting Digital Veterinarian...</h3>
+            <p>Analyzing temperature, heart rate, gas exposure, and activity levels. Running predictive diagnostic models.</p>
+            <div class="loading-skeletons">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line"></div>
+            </div>
+          </div>
+
+          <!-- Content State (hidden initially) -->
+          <div class="ai-report-content" id="aiReportContent" style="display: none;">
+            <div class="ai-report-grid">
+              <!-- Left Panel: Summary, Risk, Confidence -->
+              <div class="ai-report-panel-left">
+                <div class="ai-report-metric-header">
+                  <div class="ai-report-avatar-wrap">
+                    <div class="ai-sparkle-glow"></div>
+                    <span class="ai-report-avatar">🩺</span>
+                  </div>
+                  <div>
+                    <div class="ai-report-label">AI Health Status</div>
+                    <div style="display: flex; align-items: center; gap: var(--space-xs); margin-top: 4px;">
+                      <div class="ai-report-status" id="aiReportStatus">--</div>
+                      <span class="trend-label" id="aiReportRiskLevelBadge" style="font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: var(--radius-full);">--</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Health Score Gauge -->
+                <div class="ai-report-gauge-section">
+                  <div class="ai-gauge-container">
+                    <svg viewBox="0 0 100 100" class="gauge-svg">
+                      <circle cx="50" cy="50" r="42" class="gauge-bg" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"></circle>
+                      <circle cx="50" cy="50" r="42" class="gauge-fill" id="aiReportGaugeFill" stroke="#22c55e" stroke-width="8" fill="none" stroke-dasharray="263.8" stroke-dashoffset="263.8" stroke-linecap="round"></circle>
+                    </svg>
+                    <div class="gauge-value">
+                      <span id="aiReportRiskVal">0</span>
+                      <span class="gauge-label">HEALTH SCORE</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ai-report-meta-row">
+                  <div class="meta-item">
+                    <span class="meta-label">CONFIDENCE</span>
+                    <span class="meta-val" id="aiReportConfidence">--</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">TIMESTAMP</span>
+                    <span class="meta-val" id="aiReportTimestamp">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Panel: Conditions, Recommendations, and Why Critical -->
+              <div class="ai-report-panel-right">
+                <!-- Possible Conditions -->
+                <div class="report-section-block">
+                  <h4 class="report-block-title">Possible Conditions</h4>
+                  <div class="conditions-tags" id="aiReportConditions">
+                    <!-- Dynamic Tag Chips -->
+                  </div>
+                </div>
+
+                <!-- Key Observations -->
+                <div class="report-section-block">
+                  <h4 class="report-block-title">Key Observations</h4>
+                  <ul class="recommendation-badges-list" id="aiReportObservations" style="gap: 4px;">
+                    <!-- Dynamic observations -->
+                  </ul>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="report-section-block">
+                  <h4 class="report-block-title">Recommendations &amp; Preventive Actions</h4>
+                  <ul class="recommendation-badges-list" id="aiReportRecommendations">
+                    <!-- Dynamic recommendations and preventive actions -->
+                  </ul>
+                </div>
+
+                <!-- Why AI Marked This Animal As Critical -->
+                <div class="report-section-block critical-reasoning-block" id="aiReportWhyCriticalBlock">
+                  <h4 class="report-block-title" id="aiReportWhyCriticalTitle">Status Reasoning</h4>
+                  <div class="critical-reasoning-box">
+                    <p id="aiReportWhyCriticalText">--</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -545,7 +671,7 @@
                 <td>Gas Level (Ambient)</td>
                 <td>V2</td>
                 <td id="repGasVal">-- ppm</td>
-                <td>0 – 200 ppm</td>
+                <td>0 – 1500 ppm</td>
                 <td id="repGasStat">--</td>
               </tr>
               <tr>
@@ -605,6 +731,6 @@
   <!-- Sidebar Overlay for mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <script src="js/dashboard.js?v=3"></script>
+  <script src="js/dashboard.js?v=555"></script>
 </body>
 </html>

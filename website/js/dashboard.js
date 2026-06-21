@@ -7,6 +7,22 @@
 // Blynk Auth Token Configuration
 const BLYNK_TOKEN = "deZoSSU9pU5aZUGqqhC_ordg66xxcVyM";
 
+// Gemini API Key Configuration
+const GEMINI_API_KEY = "AIzaSyAU5rk9AfdHlFamr2lBQ4sIb4cLrsN7a6A";
+
+// Helper to resolve the Gemini API key, prioritizing UI inputs (localStorage) over code defaults
+function getGeminiApiKey() {
+  const stored = localStorage.getItem('gemini_api_key');
+  if (stored === 'YOUR_API_KEY') {
+    localStorage.removeItem('gemini_api_key');
+    return GEMINI_API_KEY;
+  }
+  if (stored && stored.trim() !== '') {
+    return stored.trim();
+  }
+  return GEMINI_API_KEY;
+}
+
 // Helper to resolve the Blynk token, prioritizing UI inputs (localStorage) over code defaults
 function getBlynkToken() {
   const stored = localStorage.getItem('blynk_auth_token');
@@ -168,7 +184,17 @@ function updateDashboardData(data) {
   if (data.hr !== null) currentVitals.hr = data.hr;
   if (data.gas !== null) currentVitals.gas = data.gas;
   if (data.movement !== null) currentVitals.movement = data.movement;
-  if (data.health !== 'UNKNOWN') currentVitals.health = data.health;
+
+  // Calculate local health status based on thresholds
+  let calculatedHealth = 'HEALTHY';
+  if (currentVitals.temp > 40 || currentVitals.hr > 130 || currentVitals.gas > 3000) {
+    calculatedHealth = 'CRITICAL';
+  } else if ((currentVitals.temp >= 39 && currentVitals.temp <= 40) || 
+             (currentVitals.hr >= 100 && currentVitals.hr <= 130) || 
+             (currentVitals.gas >= 1500 && currentVitals.gas <= 3000)) {
+    calculatedHealth = 'WARNING';
+  }
+  currentVitals.health = calculatedHealth;
 
   // 1. Temperature Card (V0)
   if (data.temp !== null && !isNaN(data.temp)) {
@@ -257,15 +283,15 @@ function updateDashboardData(data) {
     if (elVal) elVal.textContent = data.gas;
     if (elUpdated) elUpdated.textContent = `Updated at ${timeStr}`;
 
-    // Bar width: scale 0 - 500
-    const pct = Math.min(100, Math.max(0, (data.gas / 500) * 100));
+    // Bar width: scale 0 - 4000
+    const pct = Math.min(100, Math.max(0, (data.gas / 4000) * 100));
     if (elBar) {
       elBar.style.width = `${pct}%`;
       // Colors
-      if (data.gas <= 200) {
+      if (data.gas <= 1500) {
         elBar.className = 'metric-bar-fill metric-bar-green';
         if (elBadge) { elBadge.textContent = 'Safe'; elBadge.className = 'metric-status-badge'; }
-      } else if (data.gas > 350) {
+      } else if (data.gas > 3000) {
         elBar.className = 'metric-bar-fill metric-bar-red';
         if (elBadge) { elBadge.textContent = 'Danger!'; elBadge.className = 'metric-status-badge danger'; }
       } else {
@@ -339,7 +365,7 @@ function updateDashboardData(data) {
 
     // Reset layout classes
     if (healthCard) healthCard.classList.remove('metric-card-pulse', 'warning-card', 'danger-card');
-    if (cow) cow.className.baseVal = '';
+    if (cow) cow.setAttribute('class', '');
 
     // Eye SVGs
     const eyesHealthy = document.getElementById('cowEyesHealthy');
@@ -356,7 +382,7 @@ function updateDashboardData(data) {
     if (status === 'HEALTHY') {
       healthVal.className = 'status-value healthy';
       if (healthDesc) healthDesc.textContent = 'All vital parameters are within normal physiological ranges. No immediate health concerns.';
-      if (cow) cow.className.baseVal = 'cow-chewing';
+      if (cow) cow.setAttribute('class', 'cow-chewing');
       if (eyesHealthy) eyesHealthy.style.display = 'block';
       if (aura) { aura.setAttribute('fill', 'rgba(34, 197, 94, 0.08)'); aura.setAttribute('stroke', 'rgba(34, 197, 94, 0.2)'); }
       
@@ -366,7 +392,7 @@ function updateDashboardData(data) {
       healthVal.className = 'status-value warning';
       if (healthDesc) healthDesc.textContent = 'Elevated sensor trends. Monitor livestock activity and parameters closely.';
       if (healthCard) healthCard.classList.add('warning-card');
-      if (cow) cow.className.baseVal = 'cow-shaking';
+      if (cow) cow.setAttribute('class', 'cow-shaking');
       if (eyesWarning) eyesWarning.style.display = 'block';
       if (sweat) sweat.style.display = 'block';
       if (aura) { aura.setAttribute('fill', 'rgba(249, 115, 22, 0.08)'); aura.setAttribute('stroke', 'rgba(249, 115, 22, 0.2)'); }
@@ -376,7 +402,7 @@ function updateDashboardData(data) {
       healthVal.className = 'status-value critical';
       if (healthDesc) healthDesc.textContent = '🚨 Severe health event detected! Contact veterinary support immediately.';
       if (healthCard) healthCard.classList.add('danger-card', 'metric-card-pulse');
-      if (cow) cow.className.baseVal = 'cow-collapsed';
+      if (cow) cow.setAttribute('class', 'cow-collapsed');
       if (eyesCritical) eyesCritical.style.display = 'block';
       if (aura) { aura.setAttribute('fill', 'rgba(239, 68, 68, 0.08)'); aura.setAttribute('stroke', 'rgba(239, 68, 68, 0.2)'); }
 
@@ -432,8 +458,8 @@ function computeAIEstimates(vitals) {
   if (vitals.hr > 90) risk += Math.min(30, (vitals.hr - 90) * 0.75);
   else if (vitals.hr < 60) risk += Math.min(20, (60 - vitals.hr) * 0.8);
 
-  // 3. Gas buildup (norm <= 150)
-  if (vitals.gas > 200) risk += Math.min(25, (vitals.gas - 200) * 0.08);
+  // 3. Gas buildup (norm <= 1500)
+  if (vitals.gas > 1500) risk += Math.min(25, (vitals.gas - 1500) * 0.01);
 
   // 4. Movement lethargy (norm >= 2.0)
   if (vitals.movement < 2.0) risk += Math.min(15, (2.0 - vitals.movement) * 8);
@@ -449,7 +475,7 @@ function computeAIEstimates(vitals) {
 
   // B. Respiratory Infection (driven by gas + temp)
   let resp = 5;
-  if (vitals.gas > 200) resp += (vitals.gas - 200) * 0.12;
+  if (vitals.gas > 1500) resp += (vitals.gas - 1500) * 0.02;
   if (vitals.temp > 39.2) resp += (vitals.temp - 39.2) * 10;
   vitals.probResp = Math.min(99, Math.max(5, Math.round(resp)));
 
@@ -459,6 +485,16 @@ function computeAIEstimates(vitals) {
   if (vitals.movement < 1.0) stress += 25; // lethargic stress
   else if (vitals.movement > 8.0) stress += 20; // hyper panic stress
   vitals.probStress = Math.min(99, Math.max(5, Math.round(stress)));
+
+  // Adjust risk score to align with health status zones
+  const status = vitals.health;
+  if (status === 'CRITICAL') {
+    vitals.riskScore = Math.min(99, Math.max(70, vitals.riskScore));
+  } else if (status === 'WARNING') {
+    vitals.riskScore = Math.min(69, Math.max(35, vitals.riskScore));
+  } else {
+    vitals.riskScore = Math.min(34, Math.max(5, vitals.riskScore));
+  }
 
   // D. Healthy State: Inverse of risk score
   vitals.probHealthy = Math.max(1, 100 - vitals.riskScore);
@@ -771,7 +807,7 @@ async function handleUserChatMessage(msgText) {
       },
       {
         keys: ['ventilation', 'exhaust', 'airflow', 'ammonia', 'methane', 'gas limit', 'air quality'],
-        reply: () => `<strong>Ventilation & Gas Baselines:</strong> Clean barn air should have ammonia (NH3) &lt; 20 ppm and methane (CH4) &lt; 500 ppm. Currently, combined sensor gases read ${currentVitals.gas} ppm. <br/>- <em>Actions:</em> If ambient gas rises above 200 ppm, turn on exhaust fans to maximum, scrape standing manure, and check for clogged drains. High gas concentrations irritate the respiratory tract, increasing susceptibility to bovine respiratory disease (BRD).`
+        reply: () => `<strong>Ventilation & Gas Baselines:</strong> Clean barn air should register safe MQ2 readings (safe: &lt;= 1500). Currently, combined sensor gases read ${currentVitals.gas}. <br/>- <em>Actions:</em> If ambient gas rises above 1500, turn on exhaust fans to maximum, scrape standing manure, and check for clogged drains. High gas concentrations irritate the respiratory tract, increasing susceptibility to bovine respiratory disease (BRD).`
       },
       {
         keys: ['optimal temperature', 'comfort zone', 'thermoneutral', 'humidity', 'comfort index', 'barn temperature'],
@@ -813,7 +849,7 @@ async function handleUserChatMessage(msgText) {
         keys: ['recommend', 'action', 'what should i do', 'treatment', 'protocol'],
         reply: () => {
           if (currentVitals.health === 'CRITICAL') {
-            return `<strong>Critical Protocol Recommended:</strong> <br/>1) Contact Dr. Sarah immediately. <br/>2) Quarantine the animal in a well-ventilated space. <br/>3) Set barn exhaust fans to max capacity to clear toxic gases (current: ${currentVitals.gas} ppm). <br/>4) Provide cool water and oral electrolytes. <br/>5) Compile the sensor history PDF report.`;
+            return `<strong>Critical Protocol Recommended:</strong> <br/>1) Contact Dr. Sarah immediately. <br/>2) Quarantine the animal in a well-ventilated space. <br/>3) Set barn exhaust fans to max capacity to clear toxic gases (current: ${currentVitals.gas}). <br/>4) Provide cool water and oral electrolytes. <br/>5) Compile the sensor history PDF report.`;
           } else if (currentVitals.health === 'WARNING') {
             return `<strong>Warning Action Protocol:</strong> <br/>1) Ensure the cow is in a shaded, well-ventilated area. <br/>2) Verify fresh water supply is active. <br/>3) Check bedding for cleanliness. <br/>4) Monitor temperature (current: ${currentVitals.temp.toFixed(1)}°C) and heart rate (current: ${currentVitals.hr} BPM) every 15 minutes. Contact veterinary service if values trend upward.`;
           } else {
@@ -831,7 +867,7 @@ async function handleUserChatMessage(msgText) {
       },
       {
         keys: ['gas', 'ppm', 'air', 'ammonia', 'methane'],
-        reply: () => `<strong>Gas & Air Quality baselines:</strong> Ambient air in the barn should register under 200 ppm of ammonia/methane. The current sensor reading is <strong>${currentVitals.gas} ppm</strong>. ${currentVitals.gas > 200 ? 'High toxic gases detected! Exhaust ventilation should be increased immediately to avoid mucosal irritation.' : 'Air quality is normal.'}`
+        reply: () => `<strong>Gas & Air Quality baselines:</strong> Ambient air MQ2 reading is safe up to 1500. The current sensor reading is <strong>${currentVitals.gas}</strong>. ${currentVitals.gas > 1500 ? 'High toxic gases detected! Exhaust ventilation should be increased immediately to avoid mucosal irritation.' : 'Air quality is normal.'}`
       },
       {
         keys: ['movement', 'motion', 'activity', 'run', 'm/s'],
@@ -980,7 +1016,7 @@ function openReportModal() {
   const getStatusText = (val, sensor) => {
     if (sensor === 'temp') return (val >= 35 && val <= 39.5) ? 'NORMAL' : 'ABNORMAL';
     if (sensor === 'hr') return (val >= 60 && val <= 90) ? 'NORMAL' : 'ABNORMAL';
-    if (sensor === 'gas') return (val <= 200) ? 'SAFE' : 'HAZARDOUS';
+    if (sensor === 'gas') return (val <= 1500) ? 'SAFE' : (val > 3000 ? 'HAZARDOUS' : 'MODERATE');
     if (sensor === 'movement') return (val >= 2.0) ? 'ACTIVE' : 'LETHARGIC';
     return 'UNKNOWN';
   };
@@ -1173,6 +1209,9 @@ function setupTokenHandlers() {
   const inputOverlay = document.getElementById('blynkOverlayTokenInput');
   const btnOverlay = document.getElementById('blynkOverlaySaveBtn');
 
+  const inputGemini = document.getElementById('geminiKeyInput');
+  const btnGemini = document.getElementById('geminiKeySaveBtn');
+
   const saveAction = (token) => {
     if (token && token.trim() !== '') {
       localStorage.setItem('blynk_auth_token', token.trim());
@@ -1193,6 +1232,24 @@ function setupTokenHandlers() {
 
   if (btnOverlay && inputOverlay) {
     btnOverlay.addEventListener('click', () => saveAction(inputOverlay.value));
+  }
+
+  if (btnGemini && inputGemini) {
+    btnGemini.addEventListener('click', () => {
+      const key = inputGemini.value.trim();
+      if (key !== '') {
+        localStorage.setItem('gemini_api_key', key);
+        showToast('Gemini API Key saved successfully.', 'success');
+      } else {
+        localStorage.removeItem('gemini_api_key');
+        showToast('Gemini API Key cleared. Defaulting to code constant.', 'info');
+      }
+    });
+    // Load existing key
+    const currGemini = getGeminiApiKey();
+    if (currGemini && currGemini !== 'YOUR_API_KEY') {
+      inputGemini.value = currGemini;
+    }
   }
 }
 
@@ -1227,6 +1284,437 @@ function updateClock() {
 }
 
 // ============================================================
+//  GEMINI AI HEALTH INTELLIGENCE
+// ============================================================
+
+function getMockReport(temp, hr, gas, movement, health) {
+  let status = "HEALTHY";
+  let score = 100;
+  let risk = "Low";
+  let conditions = ["None Detected"];
+  let observations = [];
+  let recommendations = [];
+  let actions = [];
+  let explanation = "";
+  
+  // Calculate thresholds
+  const isCritical = (temp > 40 || hr > 130 || gas > 3000 || health === 'CRITICAL');
+  const isWarning = !isCritical && (temp >= 39 || hr >= 100 || gas >= 1500 || health === 'WARNING');
+  
+  if (isCritical) {
+    status = "CRITICAL";
+    score = Math.max(10, 100 - currentVitals.riskScore); // Health Score is inverse of local risk
+    risk = "High";
+    
+    if (temp > 40) {
+      conditions.push("High Fever / Severe Hyperthermia", "Infectious Disease / Heat Stroke");
+      observations.push(`Temperature is highly elevated at ${temp}°C, indicating critical metabolic or environmental distress.`);
+      recommendations.push("Isolate the animal to a cool, shaded quarantine stall immediately.");
+      actions.push("Administer cold water or misting and apply electrolytes.");
+    }
+    if (hr > 130) {
+      conditions.push("Severe Tachycardia / Acute Stress");
+      observations.push(`Heart rate is extremely fast at ${hr} BPM, suggesting severe cardiovascular strain.`);
+      recommendations.push("Prepare veterinary diagnostic history and contact attending specialist.");
+      actions.push("Minimize external noise, predators, or handling triggers.");
+    }
+    if (gas > 3000) {
+      conditions.push("Toxic Gas Exposure / Respiratory Failure");
+      observations.push(`Ammonia/methane ambient levels are hazardous at ${gas} ppm.`);
+      recommendations.push("Move the herd to fresh pasture or clear ventilation blockages immediately.");
+      actions.push("Turn on auxiliary barn blowers to clear gaseous accumulation.");
+    }
+    if (movement < 0.8) {
+      conditions.push("Severe Lethargy / Recumbency");
+      observations.push(`Movement acceleration index is extremely sluggish at ${movement} m/s².`);
+      recommendations.push("Physically inspect the animal for injury or lameness.");
+      actions.push("Provide immediate soft bedding and direct supervision.");
+    }
+    if (conditions.includes("None Detected")) {
+      conditions = conditions.filter(c => c !== "None Detected");
+    }
+    explanation = `The animal was classified as CRITICAL due to severe parameter breaches. Health score is currently at ${score}%. Immediate clinical support is advised.`;
+  } else if (isWarning) {
+    status = "WARNING";
+    score = Math.max(40, 100 - currentVitals.riskScore);
+    risk = "Medium";
+    
+    if (temp >= 39) {
+      conditions.push("Mild Hyperthermia / Stress Response");
+      observations.push(`Temperature is slightly elevated at ${temp}°C.`);
+      recommendations.push("Verify shaded spots and water availability.");
+      actions.push("Increase ventilation in the barn area.");
+    }
+    if (hr >= 100) {
+      conditions.push("Mild Cardiovascular Distress");
+      observations.push(`Heart rate is elevated at ${hr} BPM.`);
+      recommendations.push("Check feed quality and stress levels.");
+      actions.push("Separate the animal from aggressive herd members.");
+    }
+    if (gas >= 1500) {
+      conditions.push("Elevated Barn Gas Concentration");
+      observations.push(`Gas concentration is moderate at ${gas} ppm.`);
+      recommendations.push("Ensure exhaust fans are fully operational.");
+      actions.push("Clear waste and manure to reduce ammonia emissions.");
+    }
+    if (conditions.includes("None Detected")) {
+      conditions = conditions.filter(c => c !== "None Detected");
+    }
+    explanation = `The animal is in a WARNING state because vital parameters are outside healthy thresholds. Preventive steps should be taken to avoid critical escalation.`;
+  } else {
+    status = "HEALTHY";
+    score = Math.max(90, 100 - currentVitals.riskScore);
+    risk = "Low";
+    conditions = ["None Detected"];
+    observations.push(`All vitals are normal: Temperature ${temp}°C, Heart Rate ${hr} BPM, Ambient Gas ${gas} ppm.`);
+    recommendations.push("Continue normal monitoring.");
+    actions.push("Maintain standard nutrition and hydration routines.");
+    explanation = "All parameters are within normal physiological bounds. The livestock exhibits healthy temperature, heart rate, and activity baselines.";
+  }
+
+  return {
+    healthStatus: status,
+    healthScore: score,
+    riskLevel: risk,
+    possibleConditions: conditions,
+    keyObservations: observations,
+    veterinaryRecommendations: recommendations,
+    preventiveActions: actions,
+    confidenceScore: "95%",
+    statusExplanation: explanation
+  };
+}
+
+function renderAIReport(report) {
+  const container = document.getElementById('aiReportCard');
+  const placeholder = document.getElementById('aiReportPlaceholder');
+  const loading = document.getElementById('aiReportLoading');
+  const content = document.getElementById('aiReportContent');
+  
+  if (!container || !content) return;
+  
+  // Hide loading and placeholder, show content
+  if (placeholder) placeholder.style.display = 'none';
+  if (loading) loading.style.display = 'none';
+  content.style.display = 'block';
+  
+  // Set risk classes on container based on Risk Level (Low=Healthy, Medium=Warning, High=Critical)
+  container.className = 'ai-report-container'; // Reset
+  let stateClass = 'state-healthy';
+  let gaugeColor = '#22c55e';
+  
+  const riskLower = (report.riskLevel || '').toLowerCase();
+  if (riskLower === 'high' || riskLower === 'critical') {
+    stateClass = 'state-critical';
+    gaugeColor = '#ef4444';
+  } else if (riskLower === 'medium' || riskLower === 'warning') {
+    stateClass = 'state-warning';
+    gaugeColor = '#f97316';
+  }
+  container.classList.add(stateClass);
+  
+  // Set Health Status & Risk Level Badge
+  const statusEl = document.getElementById('aiReportStatus');
+  if (statusEl) {
+    statusEl.textContent = report.healthStatus;
+    statusEl.className = 'ai-report-status';
+    if (stateClass === 'state-critical') statusEl.style.color = 'var(--color-critical)';
+    else if (stateClass === 'state-warning') statusEl.style.color = 'var(--color-warning)';
+    else statusEl.style.color = 'var(--color-healthy)';
+  }
+  
+  const badgeEl = document.getElementById('aiReportRiskLevelBadge');
+  if (badgeEl) {
+    badgeEl.textContent = `${report.riskLevel} Risk`;
+    badgeEl.style.color = '#fff';
+    if (stateClass === 'state-critical') {
+      badgeEl.style.background = 'rgba(239, 68, 68, 0.3)';
+      badgeEl.style.border = '1px solid rgba(239, 68, 68, 0.5)';
+    } else if (stateClass === 'state-warning') {
+      badgeEl.style.background = 'rgba(249, 115, 22, 0.3)';
+      badgeEl.style.border = '1px solid rgba(249, 115, 22, 0.5)';
+    } else {
+      badgeEl.style.background = 'rgba(34, 197, 94, 0.3)';
+      badgeEl.style.border = '1px solid rgba(34, 197, 94, 0.5)';
+    }
+  }
+  
+  // Set Health Score Val
+  const scoreValEl = document.getElementById('aiReportRiskVal');
+  if (scoreValEl) scoreValEl.textContent = report.healthScore;
+  
+  // Update gauge circle
+  const gaugeFill = document.getElementById('aiReportGaugeFill');
+  if (gaugeFill) {
+    const circumference = 263.8;
+    const offset = circumference * (1 - report.healthScore / 100);
+    gaugeFill.style.strokeDashoffset = offset;
+    gaugeFill.setAttribute('stroke', gaugeColor);
+  }
+  
+  // Set confidence and timestamp
+  const confEl = document.getElementById('aiReportConfidence');
+  if (confEl) {
+    let scoreStr = String(report.confidenceScore || report.confidenceLevel || '95%');
+    if (!scoreStr.includes('%')) scoreStr += '%';
+    confEl.textContent = scoreStr;
+  }
+  
+  const timeEl = document.getElementById('aiReportTimestamp');
+  if (timeEl) {
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString() + ' ' + now.toLocaleDateString();
+  }
+  
+  // Possible conditions tags
+  const conditionsEl = document.getElementById('aiReportConditions');
+  if (conditionsEl) {
+    conditionsEl.innerHTML = '';
+    (report.possibleConditions || []).forEach(cond => {
+      const chip = document.createElement('span');
+      chip.className = 'condition-tag-chip';
+      chip.textContent = cond;
+      conditionsEl.appendChild(chip);
+    });
+  }
+  
+  // Key Observations list
+  const obsEl = document.getElementById('aiReportObservations');
+  if (obsEl) {
+    obsEl.innerHTML = '';
+    (report.keyObservations || []).forEach(obs => {
+      const item = document.createElement('li');
+      item.className = 'recommendation-badge-item';
+      
+      const icon = document.createElement('span');
+      icon.className = 'rec-check-icon';
+      icon.textContent = '👁️';
+      
+      const text = document.createElement('span');
+      text.textContent = obs;
+      
+      item.appendChild(icon);
+      item.appendChild(text);
+      obsEl.appendChild(item);
+    });
+  }
+  
+  // Recommendations and Preventive Actions list
+  const recsEl = document.getElementById('aiReportRecommendations');
+  if (recsEl) {
+    recsEl.innerHTML = '';
+    
+    // Combine Recommendations and Actions
+    const combinedList = [];
+    (report.veterinaryRecommendations || []).forEach(rec => {
+      combinedList.push({ text: rec, icon: '🩹' });
+    });
+    (report.preventiveActions || []).forEach(act => {
+      combinedList.push({ text: act, icon: '🛡️' });
+    });
+    
+    combinedList.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'recommendation-badge-item';
+      
+      const icon = document.createElement('span');
+      icon.className = 'rec-check-icon';
+      icon.textContent = item.icon;
+      
+      const text = document.createElement('span');
+      text.textContent = item.text;
+      
+      li.appendChild(icon);
+      li.appendChild(text);
+      recsEl.appendChild(li);
+    });
+  }
+  
+  // AI Status Reasoning
+  const whyBlock = document.getElementById('aiReportWhyCriticalBlock');
+  const whyTitle = document.getElementById('aiReportWhyCriticalTitle');
+  const whyText = document.getElementById('aiReportWhyCriticalText');
+  if (whyBlock && whyText) {
+    whyBlock.style.display = 'block';
+    
+    if (whyTitle) {
+      whyTitle.textContent = `Why AI Marked This Animal As ${report.healthStatus || 'Healthy'}`;
+    }
+    
+    whyText.textContent = report.statusExplanation || report.whyCritical || '';
+    
+    const box = whyBlock.querySelector('.critical-reasoning-box');
+    if (box) {
+      if (stateClass === 'state-critical') {
+        box.style.background = 'rgba(239, 68, 68, 0.06)';
+        box.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+        whyText.style.color = '#fca5a5';
+      } else if (stateClass === 'state-warning') {
+        box.style.background = 'rgba(249, 115, 22, 0.06)';
+        box.style.borderColor = 'rgba(249, 115, 22, 0.3)';
+        whyText.style.color = '#fed7aa';
+      } else {
+        box.style.background = 'rgba(34, 197, 94, 0.04)';
+        box.style.borderColor = 'rgba(34, 197, 94, 0.15)';
+        whyText.style.color = '#bbf7d0';
+      }
+    }
+  }
+}
+
+function setupGeminiHandlers() {
+  const btn = document.getElementById('btnGenerateAIReport');
+  if (!btn) return;
+  
+  btn.addEventListener('click', async () => {
+    const temp = currentVitals.temp;
+    const hr = currentVitals.hr;
+    const gas = currentVitals.gas;
+    const movement = currentVitals.movement;
+    const health = currentVitals.health;
+    
+    // Disable button, show loading
+    btn.disabled = true;
+    const btnText = btn.querySelector('.btn-text');
+    if (btnText) btnText.textContent = 'Generating...';
+    
+    const placeholder = document.getElementById('aiReportPlaceholder');
+    const loading = document.getElementById('aiReportLoading');
+    const content = document.getElementById('aiReportContent');
+    const container = document.getElementById('aiReportCard');
+    
+    if (placeholder) placeholder.style.display = 'none';
+    if (content) content.style.display = 'none';
+    if (loading) loading.style.display = 'flex';
+    if (container) {
+      container.className = 'ai-report-container'; // reset states
+    }
+    
+    const apiKey = getGeminiApiKey();
+    const isMock = (apiKey === 'YOUR_API_KEY');
+    
+    try {
+      if (isMock) {
+        // Simulate a delay of 1.5 seconds for loading animation
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const report = getMockReport(temp, hr, gas, movement, health);
+        renderAIReport(report);
+      } else {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        
+        const promptText = `You are an expert livestock veterinarian and animal health specialist.
+
+Analyze the following real-time livestock sensor readings:
+
+Temperature: ${temp} °C
+Heart Rate: ${hr} BPM
+Gas Level: ${gas} ppm
+Movement: ${movement} m/s²
+Current Status: ${health}
+
+Generate a professional livestock health report containing:
+
+1. Health Status
+2. Health Score (0-100)
+3. Risk Level (Low, Medium, High)
+4. Possible Conditions
+5. Key Observations
+6. Veterinary Recommendations
+7. Preventive Actions
+8. Confidence Score (%)
+9. Explain why the animal received this status
+
+Format the response professionally with clear headings and bullet points.
+
+If values indicate abnormal conditions, explain possible causes and suggest practical actions for the farmer.
+
+Keep the report concise, realistic, and suitable for a livestock monitoring dashboard. You MUST format the response as JSON using the requested schema.`;
+
+        const payload = {
+          contents: [{
+            parts: [{ text: promptText }]
+          }],
+          systemInstruction: {
+            parts: [{
+              text: "You are an expert livestock veterinarian and animal health specialist. Analyze the provided sensor readings and generate a concise professional health report. Consider temperature, heart rate, gas exposure, movement, and current status. Identify risks, possible conditions, and provide practical recommendations for the farmer. You MUST format the response as JSON using the requested schema. Important: Do NOT return empty arrays for possibleConditions, keyObservations, veterinaryRecommendations, or preventiveActions. If the animal is healthy, populate them with appropriate positive observations (e.g., 'Normal body temperature maintained') and standard preventive actions (e.g., 'Ensure continuous access to fresh water')."
+            }]
+          },
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                healthStatus: { type: "STRING" },
+                healthScore: { type: "INTEGER" },
+                riskLevel: { type: "STRING" },
+                possibleConditions: { type: "ARRAY", items: { type: "STRING" } },
+                keyObservations: { type: "ARRAY", items: { type: "STRING" } },
+                veterinaryRecommendations: { type: "ARRAY", items: { type: "STRING" } },
+                preventiveActions: { type: "ARRAY", items: { type: "STRING" } },
+                confidenceScore: { type: "STRING" },
+                statusExplanation: { type: "STRING" }
+              },
+              required: [
+                "healthStatus",
+                "healthScore",
+                "riskLevel",
+                "possibleConditions",
+                "keyObservations",
+                "veterinaryRecommendations",
+                "preventiveActions",
+                "confidenceScore",
+                "statusExplanation"
+              ]
+            }
+          }
+        };
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error(`Gemini API returned status ${res.status}`);
+        }
+
+        const json = await res.json();
+        const text = json.candidates[0].content.parts[0].text;
+        const result = JSON.parse(text);
+        
+        // Ensure the report healthScore and healthStatus align with the dashboard's calculated metrics
+        result.healthScore = 100 - currentVitals.riskScore;
+        result.healthStatus = currentVitals.health;
+        
+        // Set the risk level accordingly
+        if (currentVitals.health === 'CRITICAL') {
+          result.riskLevel = 'High';
+        } else if (currentVitals.health === 'WARNING') {
+          result.riskLevel = 'Medium';
+        } else {
+          result.riskLevel = 'Low';
+        }
+        
+        renderAIReport(result);
+        showToast("Gemini Health intelligence report generated successfully.", "success");
+      }
+    } catch (err) {
+      console.error("Gemini API Error:", err);
+      showToast("Offline mode: Displaying local health intelligence assessment.", "info");
+      
+      // Visual feedback for error but fallback
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const report = getMockReport(temp, hr, gas, movement, health);
+      renderAIReport(report);
+    } finally {
+      btn.disabled = false;
+      if (btnText) btnText.textContent = 'Generate AI Report';
+    }
+  });
+}
+
+// ============================================================
 //  INITIALIZATION
 // ============================================================
 
@@ -1236,6 +1724,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupChatbotHandlers();
   setupEmergencyHandlers();
   setupReportModalHandlers();
+  setupGeminiHandlers();
   
   const token = getBlynkToken();
   const hasToken = (token && token !== 'YOUR_AUTH_TOKEN' && token.trim() !== '');
