@@ -97,6 +97,14 @@ async function fetchBlynkConnection(token) {
 async function pollBlynkData() {
   if (isFetching) return;
   
+  // Pause fetching if Live Monitoring toggle is turned off
+  const liveToggle = document.getElementById('liveMonitoringToggle');
+  if (liveToggle && !liveToggle.checked) {
+    const blynkStatusText = document.getElementById('blynkConnectionText');
+    if (blynkStatusText) blynkStatusText.textContent = 'PAUSED';
+    return;
+  }
+  
   const token = getBlynkToken();
   if (!token || token === 'YOUR_AUTH_TOKEN' || token.trim() === '') {
     updateTokenStateUI(false);
@@ -578,6 +586,13 @@ function updatePredictiveAnalytics(vitals) {
 // ============================================================
 
 function speakAlertStatus(status) {
+  // Only speak if we are actually on the Dashboard page (checking for a unique dashboard element)
+  if (!document.getElementById('aiHealthIntelligence')) return;
+
+  // Do not speak if the user is actively viewing the Sensors or Charts sections
+  const currentHash = window.location.hash;
+  if (currentHash === '#sensorCards' || currentHash === '#chartsSection') return;
+
   if (status === lastAlertStatus) return;
   lastAlertStatus = status;
 
@@ -978,13 +993,16 @@ function setupEmergencyHandlers() {
 
   if (btnVet) {
     btnVet.addEventListener('click', () => {
-      showToast(`Emergency dispatch triggered to Veterinarian (Dr. Sarah). Diagnostics transmitted.`, 'error');
+      window.location.href = 'tel:+919947377395';
+      showToast(`Emergency dispatch triggered to Veterinarian (+91 99473 77395). Diagnostics transmitted.`, 'error');
     });
   }
 
   if (btnWhatsApp) {
     btnWhatsApp.addEventListener('click', () => {
-      showToast(`WhatsApp Broadcast: Diagnostic summary pushed to veterinary chat groups. Status: ${currentVitals.health}.`, 'info');
+      const msg = encodeURIComponent(`URGENT: FarmGuard Vitals Alert\nStatus: ${currentVitals.health}\nTemp: ${currentVitals.temp.toFixed(1)}°C\nHeart Rate: ${currentVitals.hr} BPM\nGas Level: ${currentVitals.gas} ppm`);
+      window.open(`https://wa.me/917025900705?text=${msg}`, '_blank');
+      showToast(`WhatsApp Broadcast: Diagnostic summary sent to +91 70259 00705.`, 'info');
     });
   }
 
@@ -1128,7 +1146,7 @@ function initRealtimeCharts() {
         backgroundColor: 'rgba(34, 197, 94, 0.05)',
         borderWidth: 2,
         fill: true,
-        tension: 0.3,
+        tension: 0, // Triangular wave (straight lines)
         pointRadius: 2,
         pointBackgroundColor: '#22c55e'
       }]
@@ -1146,7 +1164,7 @@ function initRealtimeCharts() {
         backgroundColor: 'rgba(239, 68, 68, 0.05)',
         borderWidth: 2,
         fill: true,
-        tension: 0.3,
+        tension: 0.5, // Sine wave (smooth curves)
         pointRadius: 2,
         pointBackgroundColor: '#ef4444'
       }]
@@ -1164,7 +1182,8 @@ function initRealtimeCharts() {
         backgroundColor: 'rgba(249, 115, 22, 0.05)',
         borderWidth: 2,
         fill: true,
-        tension: 0.3,
+        stepped: true, // Square wave
+        tension: 0,
         pointRadius: 2,
         pointBackgroundColor: '#f97316'
       }]
