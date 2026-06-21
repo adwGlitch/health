@@ -428,8 +428,27 @@ function setupSidebar() {
   function open()  { sidebar.classList.add('open');  overlay.classList.add('visible');  document.body.style.overflow = 'hidden'; }
   function close() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); document.body.style.overflow = ''; }
 
-  toggle.addEventListener('click', () => sidebar.classList.contains('open') ? close() : open());
-  overlay.addEventListener('click', close);
+  if (toggle && sidebar && overlay) {
+    toggle.addEventListener('click', () => {
+      if (window.innerWidth <= 992) {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+      } else {
+        document.body.classList.toggle('sidebar-collapsed');
+      }
+    });
+    overlay.addEventListener('click', close);
+
+    // Keyboard shortcuts for desktop
+    document.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (e.key === 'ArrowLeft' && window.innerWidth > 992) {
+        document.body.classList.add('sidebar-collapsed');
+      } else if (e.key === 'ArrowRight' && window.innerWidth > 992) {
+        document.body.classList.remove('sidebar-collapsed');
+      }
+    });
+  }
 }
 
 // ============================================================

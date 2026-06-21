@@ -12,6 +12,7 @@
   align-items: center;
   overflow: hidden;
   padding-top: 64px;
+  padding-bottom: 100px;
   background: linear-gradient(165deg, #f0fdf4 0%, #ffffff 50%, #f9fafb 100%);
 }
 
@@ -186,8 +187,8 @@
 .hero-scroll-indicator {
   position: absolute;
   bottom: var(--space-xl);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -201,13 +202,13 @@
   width: 20px; height: 20px;
   border-right: 2px solid var(--gray-300);
   border-bottom: 2px solid var(--gray-300);
-  transform: rotate(45deg);
+  transform: translateY(0) rotate(45deg);
   animation: scrollBounce 1.5s ease-in-out infinite;
   margin-top: -4px;
 }
 @keyframes scrollBounce {
-  0%, 100% { transform: rotate(45deg) translateY(0); }
-  50% { transform: rotate(45deg) translateY(6px); }
+  0%, 100% { transform: translateY(0) rotate(45deg); }
+  50% { transform: translateY(6px) rotate(45deg); }
 }
 
 /* ============================================================
@@ -436,6 +437,7 @@
   letter-spacing: 0.08em;
   color: var(--gray-400);
   margin-bottom: var(--space-lg);
+  text-align: center;
 }
 
 .arch-nodes {
@@ -443,6 +445,11 @@
   flex-wrap: wrap;
   gap: var(--space-md);
   justify-content: center;
+}
+
+.arch-nodes:not(.arch-nodes-vertical) .arch-node {
+  flex: 1;
+  min-width: 140px;
 }
 
 .arch-nodes-vertical {

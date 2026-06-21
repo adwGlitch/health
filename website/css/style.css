@@ -334,7 +334,7 @@ a { text-decoration: none; color: inherit; }
 .dash-section-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 .dash-section-badge {

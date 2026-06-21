@@ -12,8 +12,8 @@
   --glass-border-hover: rgba(255, 255, 255, 0.12);
   
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
   
   --color-healthy: #22c55e;
   --color-warning: #f97316;
@@ -51,7 +51,7 @@
   position: fixed;
   top: 0; left: 0;
   z-index: 50;
-  transition: transform var(--transition-base);
+  transition: transform var(--transition-base), width var(--transition-base);
 }
 
 .sidebar-header {
@@ -162,6 +162,47 @@
 }
 
 /* ============================================================
+   COLLAPSED SIDEBAR (Desktop)
+   ============================================================ */
+body.sidebar-collapsed .sidebar {
+  width: 80px;
+}
+
+body.sidebar-collapsed .main-content {
+  margin-left: 80px;
+}
+
+body.sidebar-collapsed .logo-text,
+body.sidebar-collapsed .sidebar-section-label,
+body.sidebar-collapsed .link-text,
+body.sidebar-collapsed .status-text,
+body.sidebar-collapsed .status-time,
+body.sidebar-collapsed .sidebar-badge {
+  display: none;
+}
+
+body.sidebar-collapsed .sidebar-header {
+  padding: var(--space-lg) 0;
+  display: flex;
+  justify-content: center;
+}
+
+body.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0.85rem 0;
+}
+
+body.sidebar-collapsed .sidebar-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+body.sidebar-collapsed .sidebar-status {
+  justify-content: center;
+  padding: var(--space-md) 0;
+}
+
+/* ============================================================
    MAIN CONTENT & TOPBAR
    ============================================================ */
 .main-content {
@@ -170,6 +211,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  transition: margin-left var(--transition-base);
 }
 
 .topbar {
@@ -200,6 +242,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  margin-left: auto;
 }
 
 /* Connection status indicator */

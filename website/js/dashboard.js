@@ -744,11 +744,17 @@ async function handleUserChatMessage(msgText) {
     const rules = [
       {
         keys: ['hello', 'hi', 'hey', 'who are you', 'introduce', 'greetings'],
-        reply: () => `Hello! I am your <strong>FarmGuard AI Veterinary Assistant</strong>. I continuously analyze sensor telemetry (V0-V3) and V4 health states to help you diagnose conditions, manage emergencies, and optimize barn conditions. Try asking me: <em>"Analyze current vitals"</em>, <em>"What is the risk of heat stress?"</em>, or <em>"Explain baseline heart rate"</em>.`
+        reply: () => {
+          const cowName = localStorage.getItem('cow_name') || 'your livestock';
+          return `Hello! I am your <strong>FarmGuard AI Veterinary Assistant</strong> monitoring ${cowName}. I continuously analyze sensor telemetry (V0-V3) and V4 health states to help you diagnose conditions, manage emergencies, and optimize barn conditions. Try asking me: <em>"Analyze current vitals"</em>, <em>"What is the risk of heat stress?"</em>, or <em>"Explain baseline heart rate"</em>.`;
+        }
       },
       {
         keys: ['vitals', 'status', 'how is', 'current readings', 'diagnose', 'check-up', 'analyze'],
-        reply: () => `Vitals analysis details: The animal status is currently <strong>${currentVitals.health}</strong>. Current values show: Temperature is ${currentVitals.temp.toFixed(1)}°C, Heart Rate is ${currentVitals.hr} BPM, Ambient Gas level is ${currentVitals.gas} ppm, and Movement activity is ${currentVitals.movement.toFixed(1)} m/s². The combined Health Risk score is evaluated at ${currentVitals.riskScore}%.`
+        reply: () => {
+          const cowName = localStorage.getItem('cow_name') || 'The animal';
+          return `Vitals analysis details: ${cowName}'s status is currently <strong>${currentVitals.health}</strong>. Current values show: Temperature is ${currentVitals.temp.toFixed(1)}°C, Heart Rate is ${currentVitals.hr} BPM, Ambient Gas level is ${currentVitals.gas} ppm, and Movement activity is ${currentVitals.movement.toFixed(1)} m/s². The combined Health Risk score is evaluated at ${currentVitals.riskScore}%.`;
+        }
       },
       {
         keys: ['why', 'reason', 'explain alert'],
@@ -1261,13 +1267,29 @@ function setupSidebarToggle() {
   if (!btnToggle || !sidebar || !overlay) return;
 
   btnToggle.addEventListener('click', () => {
-    sidebar.classList.add('open');
-    overlay.classList.add('visible');
+    if (window.innerWidth <= 992) {
+      sidebar.classList.add('open');
+      overlay.classList.add('visible');
+    } else {
+      document.body.classList.toggle('sidebar-collapsed');
+    }
   });
 
   overlay.addEventListener('click', () => {
     sidebar.classList.remove('open');
     overlay.classList.remove('visible');
+  });
+
+  // Keyboard shortcuts for desktop
+  document.addEventListener('keydown', (e) => {
+    // Ignore if typing in an input
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+    if (e.key === 'ArrowLeft' && window.innerWidth > 992) {
+      document.body.classList.add('sidebar-collapsed');
+    } else if (e.key === 'ArrowRight' && window.innerWidth > 992) {
+      document.body.classList.remove('sidebar-collapsed');
+    }
   });
 }
 
